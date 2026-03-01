@@ -4,6 +4,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
+  FlatList,
 } from 'react-native';
 import { useEffect, useState } from 'react';
 
@@ -14,7 +15,10 @@ import {
   setDoc,
   collection,
   addDoc,
+  getDocs,
 } from 'firebase/firestore';
+
+import { UsersList } from './src/users';
 
 export default function App() {
   const [nome, setNome] = useState('');
@@ -22,6 +26,8 @@ export default function App() {
   const [cargo, setCargo] = useState('');
 
   const [showForm, setShowForm] = useState(true);
+
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
     async function buscarDados() {
@@ -37,6 +43,24 @@ export default function App() {
       // }).catch(error => {
       //   console.log('Erro ao buscar os dados: ' + error);
       // });
+      const usersRef = collection(db, 'users');
+
+      getDocs(usersRef)
+        .then(snapshot => {
+          let lista = [];
+          snapshot.forEach(doc => {
+            lista.push({
+              id: doc.id,
+              nome: doc.data().nome,
+              idade: doc.data().idade,
+              cargo: doc.data().cargo,
+            });
+          });
+          setUsers(lista);
+        })
+        .catch(error => {
+          console.log('Erro ao buscar os dados: ' + error);
+        });
     }
 
     buscarDados();
@@ -108,6 +132,17 @@ export default function App() {
           {showForm ? 'Esconder Formulário' : 'Mostrar Formulário'}
         </Text>
       </TouchableOpacity>
+
+      <Text style={{ marginTop: 14, marginLeft: 10, marginRight: 10 }}>
+        Usuários
+      </Text>
+
+      <FlatList
+        style={styles.list}
+        data={users}
+        keyExtractor={item => String(item.id)}
+        renderItem={({ item }) => <UsersList data={item}></UsersList>}
+      ></FlatList>
     </View>
   );
 }
@@ -144,5 +179,10 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     marginRight: 10,
     marginBottom: 10,
+  },
+  list: {
+    marginLeft: 10,
+    marginRight: 10,
+    marginTop: 10,
   },
 });
