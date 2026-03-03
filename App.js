@@ -16,6 +16,7 @@ import {
   collection,
   addDoc,
   getDocs,
+  updateDoc
 } from 'firebase/firestore';
 
 import { UsersList } from './src/users';
@@ -26,6 +27,7 @@ export default function App() {
   const [cargo, setCargo] = useState('');
 
   const [showForm, setShowForm] = useState(true);
+  const [isEditing, setIsEditing] = useState('');
 
   const [users, setUsers] = useState([]);
 
@@ -100,6 +102,33 @@ export default function App() {
     setShowForm(!showForm);
   }
 
+  function editUser(data) {
+    setNome(data.nome);
+    setIdade(data.idade);
+    setCargo(data.cargo);
+    setIsEditing(data.id);
+  }
+
+  async function handlerEditUser() {
+    const docRef = doc(db, 'users', isEditing);
+
+    await updateDoc(docRef, {
+      nome: nome,
+      idade: idade,
+      cargo: cargo,
+    })
+      .then(() => {
+        console.log('Dados editados com sucesso!');
+        setNome('');
+        setIdade('');
+        setCargo('');
+        setIsEditing('');
+      })
+      .catch(error => {
+        console.log('Erro ao editar os dados: ' + error);
+      });
+  }
+
   return (
     <View style={styles.container}>
       {showForm && (
@@ -131,9 +160,15 @@ export default function App() {
             onChangeText={text => setCargo(text)}
           />
 
-          <TouchableOpacity style={styles.button} onPress={handlerRegister}>
-            <Text style={styles.textButton}>Adicionar</Text>
-          </TouchableOpacity>
+          {isEditing !== "" ? (
+            <TouchableOpacity style={styles.button} onPress={handlerEditUser}>
+              <Text style={styles.textButton}>Editar Usuário</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={styles.button} onPress={handlerRegister}>
+              <Text style={styles.textButton}>Adicionar</Text>
+            </TouchableOpacity>
+          )}
         </View>
       )}
 
@@ -154,7 +189,12 @@ export default function App() {
         style={styles.list}
         data={users}
         keyExtractor={item => String(item.id)}
-        renderItem={({ item }) => <UsersList data={item}></UsersList>}
+        renderItem={({ item }) => (
+          <UsersList
+            data={item}
+            handleEdit={item => editUser(item)}
+          ></UsersList>
+        )}
       ></FlatList>
     </View>
   );

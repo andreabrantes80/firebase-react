@@ -3,7 +3,7 @@ import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { db } from './firebaseConnection';
 import { doc, deleteDoc } from 'firebase/firestore';
 
-export function UsersList({ data }) {
+export function UsersList({ data, handleEdit }) {
 
 
     async function handleDeleteItem() {
@@ -12,6 +12,10 @@ export function UsersList({ data }) {
         await deleteDoc(docRef);
 
     }
+
+    function handleEditUser() {
+        handleEdit(data);
+     }
 
 
     return (
@@ -22,6 +26,9 @@ export function UsersList({ data }) {
 
             <TouchableOpacity style={styles.button}  onPress={handleDeleteItem}>
                 <Text style={styles.buttonText}>Excluir</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.buttonEdit}  onPress={handleEditUser}>
+                <Text style={styles.buttonText}>Editar Usuário</Text>
             </TouchableOpacity>
         </View>
     )
@@ -48,5 +55,12 @@ const styles = StyleSheet.create({
     buttonText: {
         color: "#fff",
         fontSize: 12,
+    },
+    buttonEdit: {
+        backgroundColor: "#000",
+        alignSelf: "flex-start",
+        padding: 6,
+        borderRadius: 4,
+        marginTop: 12,
     }
 })
