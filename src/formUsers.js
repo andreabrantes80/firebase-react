@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { useEffect, useState } from 'react';
 
-import { db } from './firebaseConnection';
+import { db, auth } from './firebaseConnection';
 import {
   doc,
   onSnapshot,
@@ -20,6 +20,7 @@ import {
 } from 'firebase/firestore';
 
 import { UsersList } from './users';
+import { signOut } from './firebase/auth';
 
 export function FormsUsers() {
   const [nome, setNome] = useState('');
@@ -129,6 +130,10 @@ export function FormsUsers() {
       });
   }
 
+  async function handleLogout() {
+    await auth.signOut(auth);
+  }
+
   return (
     <View style={styles.container}>
       {showForm && (
@@ -196,6 +201,10 @@ export function FormsUsers() {
           ></UsersList>
         )}
       ></FlatList>
+
+      <TouchableOpacity style={styles.buttonLogout}  onPress={handleLogout}>
+        <Text style={{ color: '#fff' }} >Sair da conta</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -238,4 +247,12 @@ const styles = StyleSheet.create({
     marginRight: 10,
     marginTop: 10,
   },
+  buttonLogout: {
+    backgroundColor: 'red',
+    alignSelf: 'flex-start',
+    margin: 14,
+    borderRadius: 4,
+    padding: 10,
+  }
+
 });

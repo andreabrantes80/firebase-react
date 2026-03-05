@@ -21,6 +21,7 @@ export default function App() {
   const [password, setPassword] = useState('');
 
   const [authUser, setAuthUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, user => {
@@ -29,8 +30,12 @@ export default function App() {
           email: user.email,
           uid: user.uid,
         });
+        setLoading(false);
         return;
       }
+
+      setAuthUser(null);
+      setLoading(false);
     });
   }, []);
 
@@ -62,11 +67,18 @@ export default function App() {
     setAuthUser(null);
   }
 
+  if (authUser) {
+    return (
+      <View style={styles.container}>
+        <FormsUsers/>
+      </View>
+    )
+  }
+
   return (
     <View style={styles.container}>
-      <Text style={styles.textButtonLogin}>
-        Usuario logado: {authUser ? authUser.email : 'Nenhum usuário logado'}
-      </Text>
+
+      {loading && <Text style={{fontSize:20, marginLeft:10, color:'#000'}} >Carregando informações...</Text>}
 
       <Text style={{ marginLeft: 10, fontSize: 18, color: '#000' }}>
         Email:
@@ -97,11 +109,13 @@ export default function App() {
         <Text style={styles.textButton}>Criar uma conta</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={handleLogout}>
-        <Text style={[styles.textButton, { backgroundColor: '#ff0000' }]}>
-          Sair da conta
-        </Text>
-      </TouchableOpacity>
+      {authUser && (
+        <TouchableOpacity style={styles.button} onPress={handleLogout}>
+          <Text style={[styles.textButton, { backgroundColor: '#ff0000' }]}>
+            Sair da conta
+          </Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
